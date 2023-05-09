@@ -32,3 +32,5 @@ if (!L3_event_checkEventFlag(L3_event_dataToSend)) ... 생략
 # L3_event_checkEventFlag는 transition
 # L3_event_dataToSend는 event
 ```
+
+-   L2_FSMmain.cpp 파일의 198, 372 라인 추후 수정 (양측 다SeqNum == 0으로 셋팅하도록)
