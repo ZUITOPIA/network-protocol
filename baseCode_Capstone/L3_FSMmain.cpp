@@ -8,6 +8,9 @@
 
 //FSM state -------------------------------------------------
 #define L3STATE_IDLE                0
+#define L3STATE_CALL_ON             1
+#define L3STATE_ESTABLISHED         2
+#define L3STATE_CALL_OFF            3
 
 
 //state variables
