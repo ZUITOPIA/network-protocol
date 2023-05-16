@@ -12,10 +12,17 @@
 #define L3STATE_ESTABLISHED         2
 #define L3STATE_CALL_OFF            3
 
-
 //state variables
 static uint8_t main_state = L3STATE_IDLE; //protocol state
 static uint8_t prev_state = main_state;
+
+//source/destination ID
+static uint8_t myL2ID=1;
+static uint8_t destL2ID=0;
+
+//L3 PDU context/size
+static uint8_t connectPdu[200];
+static uint8_t pduSize;
 
 //SDU (input)
 static uint8_t originalWord[1030];
@@ -77,7 +84,7 @@ void L3_FSMrun(void)
     {
         case L3STATE_IDLE: //IDLE state description
             
-            if (L3_event_checkEventFlag(L3_event_msgRcvd)) //if data reception event happens
+            if (L3_event_checkEventFlag(L3_event_CALLON_REQ_SEND)) //if data reception event happens
             {
                 //Retrieving data info.
                 uint8_t* dataPtr = L3_LLI_getMsgPtr();
@@ -88,22 +95,22 @@ void L3_FSMrun(void)
                 
                 pc.printf("Give a word to send : ");
                 
-                L3_event_clearEventFlag(L3_event_msgRcvd);
+                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
             }
-            else if (L3_event_checkEventFlag(L3_event_dataToSend)) //if data needs to be sent (keyboard input)
-            {
-                //msg header setting
-                strcpy((char*)sdu, (char*)originalWord);
-                debug("[L3] msg length : %i\n", wordLen);
-                L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
+            // else if (L3_event_checkEventFlag(L3_event_dataToSend)) //if data needs to be sent (keyboard input)
+            // {
+            //     //msg header setting
+            //     strcpy((char*)sdu, (char*)originalWord);
+            //     debug("[L3] msg length : %i\n", wordLen);
+            //     L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
 
-                debug_if(DBGMSG_L3, "[L3] sending msg....\n");
-                wordLen = 0;
+            //     debug_if(DBGMSG_L3, "[L3] sending msg....\n");
+            //     wordLen = 0;
 
-                pc.printf("Give a word to send : ");
+            //     pc.printf("Give a word to send : ");
 
-                L3_event_clearEventFlag(L3_event_dataToSend);
-            }
+            //     L3_event_clearEventFlag(L3_event_dataToSend);
+            // }
             break;
 
         case L3STATE_CALL_ON:
