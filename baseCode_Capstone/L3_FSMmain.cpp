@@ -106,6 +106,33 @@ void L3_FSMrun(void)
             }
             break;
 
+        case L3STATE_CALL_ON:
+            if (){
+
+            }
+            else if (){
+
+            }
+            break;
+
+        case L3STATE_ESTABLISHED:
+            if (){
+
+            }
+            else if (){
+
+            }
+            break;
+
+        case L3STATE_CALL_OFF:
+            if (){
+
+            }
+            else if (){
+
+            }
+            break;
+
         default :
             break;
     }
