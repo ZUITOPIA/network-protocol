@@ -38,7 +38,7 @@ static uint8_t myDestId;
 static void L3service_processInputWord(void)
 {
     char c = pc.getc();
-    if (!L3_event_checkEventFlag(L3_event_dataToSend))
+    if (!L3_event_checkEventFlag(L3_event_CALLON_REQ_SEND))
     {
         if (c == '\n' || c == '\r')
         {

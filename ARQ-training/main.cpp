@@ -10,7 +10,7 @@
 //FSM state -------------------------------------------------
 #define MAINSTATE_IDLE              0
 #define MAINSTATE_TX                1
-#define MAINSTATE_ACK                2
+#define MAINSTATE_ACK               2
 
 //GLOBAL variables (DO NOT TOUCH!) ------------------------------------------
 //serial port interface
