@@ -92,16 +92,17 @@ void L3_FSMrun(void)
                 //PDU encoding(connection callonreq)
 
                 //DATA_REQ
-                //others (timer...)
+                
                 //debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
                 //            dataPtr, size);
                 
                 
                 L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
             }
-            else if ()
+            else if (L3_event_checkEventFlag())
             {
                 //clear
+                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
             }
             // else if (L3_event_checkEventFlag(L3_event_dataToSend)) //if data needs to be sent (keyboard input)
             // {
@@ -119,30 +120,42 @@ void L3_FSMrun(void)
             // }
             break;
 
-        case L3STATE_CALL_ON:
-            if (){
-
+        case L3STATE_CALL_ON: //CallOn state description
+            if (L3_event_checkEventFlag(L3_event_CALLON_REQ_CNF)){
+                //sending CALLON_REQ
+                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
             }
             else if (){
-
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
             }
             break;
 
-        case L3STATE_ESTABLISHED:
-            if (){
-
+        case L3STATE_ESTABLISHED: //ESTABLISHED state description
+            if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ_SEND)){
+                //
+                //others (timer...)
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_SEND);
             }
             else if (){
-
+                //timeout or exit입력
+                //calloff_req send
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_SEND);
+            }
+            else if (){
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_SEND);
             }
             break;
 
-        case L3STATE_CALL_OFF:
-            if (){
-
+        case L3STATE_CALL_OFF: //CallOff state description
+            if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ_CNF)){
+                //
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_CNF);
             }
             else if (){
-
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_CNF);
             }
             break;
 
