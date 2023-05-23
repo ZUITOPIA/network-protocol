@@ -43,7 +43,7 @@ static void L3service_processInputWord(void)
         if (c == '\n' || c == '\r')
         {
             originalWord[wordLen++] = '\0';
-            L3_event_setEventFlag(L3_event_dataToSend);
+            L3_event_setEventFlag(L3_event_CALLON_REQ_SEND);
             debug_if(DBGMSG_L3,"word is ready! ::: %s\n", originalWord);
         }
         else
@@ -52,7 +52,7 @@ static void L3service_processInputWord(void)
             if (wordLen >= L3_MAXDATASIZE-1)
             {
                 originalWord[wordLen++] = '\0';
-                L3_event_setEventFlag(L3_event_dataToSend);
+                L3_event_setEventFlag(L3_event_CALLON_REQ_SEND);
                 pc.printf("\n max reached! word forced to be ready :::: %s\n", originalWord);
             }
         }
@@ -86,16 +86,22 @@ void L3_FSMrun(void)
             
             if (L3_event_checkEventFlag(L3_event_CALLON_REQ_SEND)) //if data reception event happens
             {
-                //Retrieving data info.
-                uint8_t* dataPtr = L3_LLI_getMsgPtr();
-                uint8_t size = L3_LLI_getSize();
+                //sending CALLON_REQ
+                //ID extraction from originalWord
 
-                debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
-                            dataPtr, size);
+                //PDU encoding(connection callonreq)
+
+                //DATA_REQ
+                //others (timer...)
+                //debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
+                //            dataPtr, size);
                 
-                pc.printf("Give a word to send : ");
                 
                 L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
+            }
+            else if ()
+            {
+                //clear
             }
             // else if (L3_event_checkEventFlag(L3_event_dataToSend)) //if data needs to be sent (keyboard input)
             // {
