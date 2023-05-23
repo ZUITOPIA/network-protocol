@@ -38,12 +38,12 @@ static uint8_t myDestId;
 static void L3service_processInputWord(void)
 {
     char c = pc.getc();
-    if (!L3_event_checkEventFlag(L3_event_CALLON_REQ_SEND))
+    if (!L3_event_checkEventFlag(L3_event_CALLON_REQ))
     {
         if (c == '\n' || c == '\r')
         {
             originalWord[wordLen++] = '\0';
-            L3_event_setEventFlag(L3_event_CALLON_REQ_SEND);
+            L3_event_setEventFlag(L3_event_CALLON_REQ);
             debug_if(DBGMSG_L3,"word is ready! ::: %s\n", originalWord);
         }
         else
@@ -52,7 +52,7 @@ static void L3service_processInputWord(void)
             if (wordLen >= L3_MAXDATASIZE-1)
             {
                 originalWord[wordLen++] = '\0';
-                L3_event_setEventFlag(L3_event_CALLON_REQ_SEND);
+                L3_event_setEventFlag(L3_event_CALLON_REQ);
                 pc.printf("\n max reached! word forced to be ready :::: %s\n", originalWord);
             }
         }
@@ -84,7 +84,7 @@ void L3_FSMrun(void)
     {
         case L3STATE_IDLE: //IDLE state description
             
-            if (L3_event_checkEventFlag(L3_event_CALLON_REQ_SEND)) //if data reception event happens
+            if (L3_event_checkEventFlag(L3_event_CALLON_REQ)) //if data reception event happens
             {
                 //sending CALLON_REQ
                 //ID extraction from originalWord
@@ -96,66 +96,138 @@ void L3_FSMrun(void)
                 //debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
                 //            dataPtr, size);
                 
-                
-                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
+                main_state = L3STATE_CALL_ON;
+                L3_event_clearEventFlag(L3_event_CALLON_REQ);
             }
-            else if (L3_event_checkEventFlag())
+            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
             {
                 //clear
-                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
+                L3_event_clearEventFlag(L3_event_CALLON_CNF);
             }
-            // else if (L3_event_checkEventFlag(L3_event_dataToSend)) //if data needs to be sent (keyboard input)
-            // {
-            //     //msg header setting
-            //     strcpy((char*)sdu, (char*)originalWord);
-            //     debug("[L3] msg length : %i\n", wordLen);
-            //     L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
-
-            //     debug_if(DBGMSG_L3, "[L3] sending msg....\n");
-            //     wordLen = 0;
-
-            //     pc.printf("Give a word to send : ");
-
-            //     L3_event_clearEventFlag(L3_event_dataToSend);
-            // }
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_REQ))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+            }   
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_CNF))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
+            }
+            else if(L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
+            }
+            else if(L3_event_checkEventFlag(L3_event_TIMEOUT))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_TIMEOUT);
+            }                                        
             break;
 
         case L3STATE_CALL_ON: //CallOn state description
-            if (L3_event_checkEventFlag(L3_event_CALLON_REQ_CNF)){
-                //sending CALLON_REQ
-                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
+            if (L3_event_checkEventFlag(L3_event_CALLON_CNF)){
+                //receiving CALLON_REQ
+                //sending CALLON_REQ to L3STATE_ESTABLISHED
+                main_state = L3STATE_ESTABLISHED;
+                L3_event_clearEventFlag(L3_event_CALLON_CNF);
             }
-            else if (){
+            else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
+            {
                 //clear
-                L3_event_clearEventFlag(L3_event_CALLON_REQ_SEND);
+                L3_event_clearEventFlag(L3_event_CALLON_REQ);
             }
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_REQ))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+            }   
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_CNF))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
+            }
+            else if(L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
+            }
+            else if(L3_event_checkEventFlag(L3_event_TIMEOUT))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_TIMEOUT);
+            }       
             break;
 
         case L3STATE_ESTABLISHED: //ESTABLISHED state description
-            if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ_SEND)){
-                //
-                //others (timer...)
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_SEND);
+            if (L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT)){
+                //keyboard input 받아서 채팅
+                //others (timer start...)
+                L3_timer_stopTimer();
+                L3_timer_startTimer();
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
-            else if (){
-                //timeout or exit입력
+            else if (L3_event_checkEventFlag(L3_event_TIMEOUT)){
+                //timeout
                 //calloff_req send
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_SEND);
+                L3_event_clearEventFlag(L3_event_TIMEOUT);
+                main_state = L3STATE_CALL_OFF;
             }
-            else if (){
+            else if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ)){
+                //exit입력
+                //calloff_req send
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+                main_state = L3STATE_CALL_OFF;
+            }
+            else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
+            {
                 //clear
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_SEND);
+                L3_event_clearEventFlag(L3_event_CALLON_REQ);
             }
+            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLON_CNF);
+            }
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_CNF))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
+            }
+
             break;
 
         case L3STATE_CALL_OFF: //CallOff state description
-            if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ_CNF)){
+            if (L3_event_checkEventFlag(L3_event_CALLOFF_CNF)){
                 //
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_CNF);
+                main_state = L3STATE_IDLE;
+                L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
             }
-            else if (){
+            else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
+            {
                 //clear
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ_CNF);
+                L3_event_clearEventFlag(L3_event_CALLON_REQ);
+            }
+            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLON_CNF);
+            }   
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_REQ))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+            }
+            else if(L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
+            }
+            else if(L3_event_checkEventFlag(L3_event_TIMEOUT))
+            {
+                //clear
+                L3_event_clearEventFlag(L3_event_TIMEOUT);
             }
             break;
 
