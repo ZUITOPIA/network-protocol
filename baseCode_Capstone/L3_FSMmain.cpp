@@ -86,19 +86,16 @@ void L3_FSMrun(void)
             
             if (L3_event_checkEventFlag(L3_event_CALLON_REQ)) //if data reception event happens
             {
-                //ID extraction from originalWord 뭐해야할지 모르겠음
                 uint8_t srcId = L3_LLI_getSrcId();
-                // uint8_t* dataPtr = arqLLI_getRcvdDataPtr();
-                // uint8_t size = arqLLI_getSize();
+                uint8_t* dataPtr = L3_LLI_getMsgPtr();
+                uint8_t size = L3_LLI_getSize();
 
-                //PDU encoding(connection callonreq) 뭐해야할지 모르겠음
-                L3_encodeData();
-
-                //DATA_REQ
-                L3_LLI_dataReqFunc(sdu~);
+                //PDU encoding(connection callonreq)
+                L3_CONREQ_encodeData(, (dataPtr));
+                L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
                 
-                //debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
-                //            dataPtr, size);
+                debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
+                           dataPtr, size);
                 
                 main_state = L3STATE_CALL_ON;
                 L3_event_clearEventFlag(L3_event_CALLON_REQ);
@@ -132,7 +129,7 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_ON: //CallOn state description
             if (L3_event_checkEventFlag(L3_event_CALLON_CNF)){
-                // L3_encodeData();
+                L3_CONCNF_encodeData();
                 L3_LLI_dataReqFunc();
                 //sending CALLON_REQ to L3STATE_ESTABLISHED
                 main_state = L3STATE_ESTABLISHED;
@@ -178,7 +175,7 @@ void L3_FSMrun(void)
 
                 if (L3_event_checkEventFlag(L3_event_TIMEOUT)){
                 //timeout
-                L3_encodeData();
+                L3_DISREQ_encodeData();
                 L3_LLI_dataReqFunc();
 
                 L3_event_clearEventFlag(L3_event_TIMEOUT);
@@ -186,7 +183,7 @@ void L3_FSMrun(void)
                 }
                 else if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ)){
                 //exit입력
-                L3_encodeData();
+                L3_DISREQ_encodeData();
                 L3_LLI_dataReqFunc();
 
                 L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
@@ -212,7 +209,7 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_OFF: //CallOff state description
             if (L3_event_checkEventFlag(L3_event_CALLOFF_CNF)){
-                // L3_encodeData();
+                L3_DISCNF_encodeData();
                 L3_LLI_dataReqFunc();
                 main_state = L3STATE_IDLE;
                 L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
