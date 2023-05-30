@@ -27,13 +27,13 @@ void L3_LLI_dataInd(uint8_t* dataPtr, uint8_t srcId, uint8_t size, int8_t snr, i
     rcvdSrcId = srcId;
 
     if (L3_checkIfCallOnReq(rcvdMsg) == 1)
-        L3_event_setEventFlag(L3_event_CALLON_REQ_SEND);
+        L3_event_setEventFlag(L3_event_CALLON_REQ);
     else if (L3_checkIfCallOnCnf(rcvdMsg) == 1)
-        L3_event_setEventFlag(L3_event_CALLON_REQ_CNF);
+        L3_event_setEventFlag(L3_event_CALLON_CNF);
     else if (L3_checkIfCallOffReq(rcvdMsg)==1)
-        L3_event_setEventFlag(L3_event_CALLOFF_REQ_SEND);
+        L3_event_setEventFlag(L3_event_CALLOFF_REQ);
     else if (L3_checkIfCallOffCnf(rcvdMsg)==1)
-        L3_event_setEventFlag(L3_event_CALLOFF_REQ_CNF);
+        L3_event_setEventFlag(L3_event_CALLOFF_CNF);
 }
 
 void L3_LLI_dataCnf(uint8_t res)
