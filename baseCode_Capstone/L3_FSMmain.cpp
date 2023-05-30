@@ -129,7 +129,7 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_ON: //CallOn state description
             if (L3_event_checkEventFlag(L3_event_CALLON_CNF)){
-                L3_CONCNF_encodeData(sdu);
+                pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 //sending CALLON_REQ to L3STATE_ESTABLISHED
                 main_state = L3STATE_ESTABLISHED;
