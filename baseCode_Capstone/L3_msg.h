@@ -15,3 +15,5 @@ int L3_checkIfCallOnReq(uint8_t* msg);
 int L3_checkIfCallOnCnf(uint8_t* msg);
 int L3_checkIfCallOffReq(uint8_t* msg);
 int L3_checkIfCallOffCnf(uint8_t* msg);
+int L3_checkIfKeyboardInput(uint8_t* msg);
+int L3_checkIfTimeout(uint8_t* msg);

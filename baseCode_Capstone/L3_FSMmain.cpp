@@ -87,11 +87,18 @@ void L3_FSMrun(void)
             if (L3_event_checkEventFlag(L3_event_CALLON_REQ)) //if data reception event happens
             {
                 //sending CALLON_REQ
-                //ID extraction from originalWord
+                L3_IDLE_sendCALLON_REQ();
 
-                //PDU encoding(connection callonreq)
+                //ID extraction from originalWord 뭐해야할지 모르겠음
+                uint8_t srcId = L3_LLI_getSrcId();
+                // uint8_t* dataPtr = arqLLI_getRcvdDataPtr();
+                // uint8_t size = arqLLI_getSize();
+
+                //PDU encoding(connection callonreq) 뭐해야할지 모르겠음
+                L3_IDLE_encodeData();
 
                 //DATA_REQ
+                L3_IDLE_sendData();
                 
                 //debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
                 //            dataPtr, size);
@@ -200,7 +207,7 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_OFF: //CallOff state description
             if (L3_event_checkEventFlag(L3_event_CALLOFF_CNF)){
-                //
+                // 
                 main_state = L3STATE_IDLE;
                 L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
             }
