@@ -24,20 +24,13 @@ int L3_checkIfCallOffCnf(uint8_t* msg)
 uint8_t L3_CONREQ_encodeData(uint8_t* msg)
 {
     msg[L3_MSG_OFFSET_TYPE] = L3_MSG_TYPE_CONREQ;
-    //msg[L3_MSG_OFFSET_SYN] = seq;
-    //msg[L3_OFFSET_DATA] = 1;
-
-    //return MSG_SIZE;
     return 1;
 }
 
-uint8_t L3_CONCNF_encodeData(uint8_t* msg, uint8_t* data, int seq, int len)
+uint8_t L3_CONCNF_encodeData(uint8_t* msg)
 {
     msg[L3_MSG_OFFSET_TYPE] = L3_MSG_TYPE_CONCNF;
-    msg[L3_MSG_OFFSET_SYN] = seq;
-    memcpy(&msg[L3_OFFSET_DATA], data, len*sizeof(uint8_t));
-
-    return len+L3_OFFSET_DATA;
+    return 1;
 }
 
 uint8_t L3_DISREQ_encodeData(uint8_t* msg, uint8_t seq)
