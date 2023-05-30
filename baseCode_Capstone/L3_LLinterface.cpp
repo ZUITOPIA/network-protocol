@@ -34,6 +34,10 @@ void L3_LLI_dataInd(uint8_t* dataPtr, uint8_t srcId, uint8_t size, int8_t snr, i
         L3_event_setEventFlag(L3_event_CALLOFF_REQ);
     else if (L3_checkIfCallOffCnf(rcvdMsg)==1)
         L3_event_setEventFlag(L3_event_CALLOFF_CNF);
+    else if (L3_checkIfCallOffCnf(rcvdMsg)==1)
+        L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
+    else if (L3_checkIfCallOffCnf(rcvdMsg)==1)
+        L3_event_setEventFlag(L3_event_TIMEOUT);
 }
 
 void L3_LLI_dataCnf(uint8_t res)
