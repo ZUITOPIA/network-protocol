@@ -19,7 +19,6 @@ static uint8_t prev_state = main_state;
 
 //source/destination ID
 static uint8_t myL2ID=1;
-static uint8_t destL2ID=0;
 
 //L3 PDU context/size
 static uint8_t pduSize;
@@ -86,10 +85,10 @@ void L3_FSMrun(void)
             
             if (L3_event_checkEventFlag(L3_event_CALLON_REQ)) //if data reception event happens
             {
-                uint8_t srcId = L3_LLI_getSrcId();
                 uint8_t* dataPtr = L3_LLI_getMsgPtr();
                 uint8_t size = L3_LLI_getSize();
 
+                pc.printf("L3STATE_IDLE");
                 //PDU encoding(connection callonreq) 질문!!!!!connect PDU가 들어가는게 맞는지
                 //pduSize = L3_CONREQ_encodeData(sdu, Msg_getSeq(dataPtr));
                 pduSize = L3_CONREQ_encodeData(sdu);
@@ -130,6 +129,7 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_ON: //CallOn state description
             if (L3_event_checkEventFlag(L3_event_CALLON_CNF)){
+                pc.printf("L3STATE_CALL_ON");
                 pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 //sending CALLON_REQ to L3STATE_ESTABLISHED
@@ -168,6 +168,8 @@ void L3_FSMrun(void)
                 L3_timer_stopTimer();
                 L3_timer_startTimer();
 
+                pc.printf("L3STATE_ESTABLISHED");
+
                 // keyboard input 받아서 채팅
                 strcpy((char*)sdu, (char*)originalWord);
                 debug("[L3] msg length : %i\n", wordLen);
@@ -192,6 +194,7 @@ void L3_FSMrun(void)
                 else if (L3_event_checkEventFlag(L3_event_TIMEOUT)||
                         L3_timer_getTimerStatus()==1){
                     //timeout
+                    pc.printf("Timeout: ");
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
 
@@ -221,6 +224,7 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_OFF: //CallOff state description
             if (L3_event_checkEventFlag(L3_event_CALLOFF_CNF)){
+                pc.printf("L3STATE_CALL_OFF");
                 pduSize = L3_DISCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);                
                 main_state = L3STATE_IDLE;
