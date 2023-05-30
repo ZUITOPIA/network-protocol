@@ -40,6 +40,7 @@ void L3_LLI_dataInd(uint8_t* dataPtr, uint8_t srcId, uint8_t size, int8_t snr, i
         L3_event_setEventFlag(L3_event_TIMEOUT);
 }
 
+//얘는 어떻게 해야하지?
 void L3_LLI_dataCnf(uint8_t res)
 {
     debug_if(DBGMSG_L3, "\n --> DATA CNF : res : %i\n", res);
