@@ -21,7 +21,6 @@ static uint8_t myL2ID=1;
 static uint8_t destL2ID=0;
 
 //L3 PDU context/size
-static uint8_t connectPdu[200];
 static uint8_t pduSize;
 
 //SDU (input)
@@ -90,9 +89,10 @@ void L3_FSMrun(void)
                 uint8_t* dataPtr = L3_LLI_getMsgPtr();
                 uint8_t size = L3_LLI_getSize();
 
-                //PDU encoding(connection callonreq)
-                L3_CONREQ_encodeData(, (dataPtr));
-                L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
+                //PDU encoding(connection callonreq) 질문!!!!!connect PDU가 들어가는게 맞는지
+                //pduSize = L3_CONREQ_encodeData(sdu, Msg_getSeq(dataPtr));
+                pduSize = L3_CONREQ_encodeData(sdu);
+                L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 
                 debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
                            dataPtr, size);
