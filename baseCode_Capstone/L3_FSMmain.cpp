@@ -67,7 +67,7 @@ void L3_initFSM(uint8_t destId)
     //initialize service layer
     pc.attach(&L3service_processInputWord, Serial::RxIrq);
 
-    pc.printf("Give a word to send : ");
+    pc.printf("Let's start");
 }
 
 void L3_FSMrun(void)

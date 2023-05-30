@@ -1,9 +1,9 @@
 typedef enum L3_event
 {
-    // L3_event_msgRcvd = 2,
-    // L3_event_dataToSend = 4,
-    // L3_event_dataSendCnf = 5,
-    // L3_event_recfgSrcIdCnf = 6,
+    L3_event_msgRcvd = 2,
+    L3_event_dataToSend = 4,
+    L3_event_dataSendCnf = 5,
+    L3_event_recfgSrcIdCnf = 6,
 
     L3_event_CALLON_REQ = 0, // 송신
     L3_event_CALLON_CNF = 1, // 수신
