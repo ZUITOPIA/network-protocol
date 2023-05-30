@@ -4,6 +4,7 @@
 #include "L3_LLinterface.h"
 #include "protocol_parameters.h"
 #include "mbed.h"
+#include <iostream>
 
 
 //FSM state -------------------------------------------------
@@ -164,30 +165,41 @@ void L3_FSMrun(void)
 
         case L3STATE_ESTABLISHED: //ESTABLISHED state description
             if (L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT)){
-                // keyboard input 받아서 채팅 
-                // 함수 실행 함수만들기
-
-                //others (timer start...)
                 L3_timer_stopTimer();
                 L3_timer_startTimer();
-                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
 
+                // keyboard input 받아서 채팅
+                strcpy((char*)sdu, (char*)originalWord);
+                debug("[L3] msg length : %i\n", wordLen);
+                L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
 
-                if (L3_event_checkEventFlag(L3_event_TIMEOUT)){
-                //timeout
-                L3_DISREQ_encodeData();
-                L3_LLI_dataReqFunc();
+                debug_if(DBGMSG_L3, "[L3] sending msg....\n");
+                wordLen = 0;
 
-                L3_event_clearEventFlag(L3_event_TIMEOUT);
-                main_state = L3STATE_CALL_OFF;
+                pc.printf("Give a word to send : ");
+
+                using namespace std;
+                std::string program_exit = "exit";
+
+                if (std::string(reinterpret_cast<char*>(sdu)).compare(program_exit)==0){
+                    pduSize = L3_DISREQ_encodeData(sdu);
+                    L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
+
+                    L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+                    main_state = L3STATE_CALL_OFF;
                 }
-                else if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ)){
-                //exit입력
-                L3_DISREQ_encodeData();
-                L3_LLI_dataReqFunc();
 
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
-                main_state = L3STATE_CALL_OFF;
+                else if (L3_event_checkEventFlag(L3_event_TIMEOUT)||
+                        L3_timer_getTimerStatus()==1){
+                    //timeout
+                    pduSize = L3_DISREQ_encodeData(sdu);
+                    L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
+
+                    L3_event_clearEventFlag(L3_event_TIMEOUT);
+                    main_state = L3STATE_CALL_OFF;
+                }
+
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
             else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
             {
@@ -209,8 +221,8 @@ void L3_FSMrun(void)
 
         case L3STATE_CALL_OFF: //CallOff state description
             if (L3_event_checkEventFlag(L3_event_CALLOFF_CNF)){
-                L3_DISCNF_encodeData();
-                L3_LLI_dataReqFunc();
+                pduSize = L3_DISCNF_encodeData(sdu);
+                L3_LLI_dataReqFunc(sdu, pduSize, myDestId);                
                 main_state = L3STATE_IDLE;
                 L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
             }
@@ -244,5 +256,4 @@ void L3_FSMrun(void)
         default :
             break;
     }
-}
 }

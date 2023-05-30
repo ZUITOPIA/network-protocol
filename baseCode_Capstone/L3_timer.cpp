@@ -19,7 +19,6 @@ void L3_timer_timeoutHandler(void)
 void L3_timer_startTimer()
 {
     uint8_t waitTime = 60; //60초로 설정
-    //L2_ARQ_MINWAITTIME + rand()%(L2_ARQ_MAXWAITTIME-L2_ARQ_MINWAITTIME); //timer length
     timer.attach(L3_timer_timeoutHandler, waitTime);
     timerStatus = 1;
 }

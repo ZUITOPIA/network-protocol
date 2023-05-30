@@ -16,8 +16,8 @@ int L3_checkIfCallOffCnf(uint8_t* msg);
 
 uint8_t L3_CONREQ_encodeData(uint8_t* msg);
 uint8_t L3_CONCNF_encodeData(uint8_t* msg);
-uint8_t L3_DISREQ_encodeData(uint8_t* msg, uint8_t seq);
-uint8_t L3_DISCNF_encodeData(uint8_t* msg, uint8_t* data, int seq, int len);
+uint8_t L3_DISREQ_encodeData(uint8_t* msg);
+uint8_t L3_DISCNF_encodeData(uint8_t* msg);
 
 uint8_t Msg_getSeq(uint8_t* msg);
 uint8_t* Msg_getWord(uint8_t* msg);
