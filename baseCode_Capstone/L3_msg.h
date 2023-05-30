@@ -8,6 +8,8 @@
 #define L3_MSG_TYPE_CONCNF              1
 #define L3_MSG_TYPE_DISREQ              2
 #define L3_MSG_TYPE_DISCNF              3
+#define L3_MSG_TYPE_KEYINPUT            4
+#define L3_MSG_TYPE_TIMEOUT             5
 
 int L3_checkIfCallOnReq(uint8_t* msg);
 int L3_checkIfCallOnCnf(uint8_t* msg);

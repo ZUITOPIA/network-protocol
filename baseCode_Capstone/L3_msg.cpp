@@ -20,3 +20,11 @@ int L3_checkIfCallOffCnf(uint8_t* msg)
 {
     return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_DISCNF);
 }
+int L3_checkIfCallOffCnf(uint8_t* msg)
+{
+    return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_KEYINPUT);
+}
+int L3_checkIfCallOffCnf(uint8_t* msg)
+{
+    return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_TIMEOUT);
+}
