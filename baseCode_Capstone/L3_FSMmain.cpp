@@ -37,12 +37,12 @@ static uint8_t myDestId;
 static void L3service_processInputWord(void)
 {
     char c = pc.getc();
-    if (!L3_event_checkEventFlag(L3_event_dataToSend))
+    if (!L3_event_checkEventFlag(L3_event_CALLON_REQ))
     {
         if (c == '\n' || c == '\r')
         {
             originalWord[wordLen++] = '\0';
-            L3_event_setEventFlag(L3_event_dataToSend);
+            L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
             debug_if(DBGMSG_L3,"word is ready! ::: %s\n", originalWord);
         }
         else
@@ -51,7 +51,7 @@ static void L3service_processInputWord(void)
             if (wordLen >= L3_MAXDATASIZE-1)
             {
                 originalWord[wordLen++] = '\0';
-                L3_event_setEventFlag(L3_event_dataToSend);
+                L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
                 pc.printf("\n max reached! word forced to be ready :::: %s\n", originalWord);
             }
         }
