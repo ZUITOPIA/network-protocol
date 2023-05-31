@@ -21,6 +21,16 @@ int L3_checkIfCallOffCnf(uint8_t* msg)
     return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_DISCNF);
 }
 
+int L3_checkIfKeyboardInput(uint8_t* msg)
+{
+    return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_KEYIINPUT);
+}
+
+int L3_checkIfTimeout(uint8_t* msg)
+{
+    return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_TIMEOUT);
+}
+
 uint8_t L3_CONREQ_encodeData(uint8_t* msg)
 {
     msg[L3_MSG_OFFSET_TYPE] = L3_MSG_TYPE_CONREQ;

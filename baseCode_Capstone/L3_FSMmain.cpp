@@ -17,9 +17,6 @@
 static uint8_t main_state = L3STATE_IDLE; //protocol state
 static uint8_t prev_state = main_state;
 
-//source/destination ID
-static uint8_t myL2ID=1;
-
 //L3 PDU context/size
 static uint8_t pduSize;
 
@@ -37,8 +34,7 @@ static uint8_t myDestId;
 static void L3service_processInputWord(void)
 {
     char c = pc.getc();
-    if (main_state == L3STATE_IDLE &&
-    !L3_event_checkEventFlag(L3_event_CALLON_REQ))
+    if (!L3_event_checkEventFlag(L3_event_CALLON_REQ))
     {
         if (c == '\n' || c == '\r')
         {
@@ -89,14 +85,13 @@ void L3_FSMrun(void)
                 uint8_t* dataPtr = L3_LLI_getMsgPtr();
                 uint8_t size = L3_LLI_getSize();
 
-                pc.printf("L3STATE_IDLE");
-                //PDU encoding(connection callonreq) 질문!!!!!connect PDU가 들어가는게 맞는지
-                //pduSize = L3_CONREQ_encodeData(sdu, Msg_getSeq(dataPtr));
                 pduSize = L3_CONREQ_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 
-                debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
-                           dataPtr, size);
+                // debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
+                        //    dataPtr, size);
+
+                pc.printf("L3STATE_IDLE");
                 
                 main_state = L3STATE_CALL_ON;
                 L3_event_clearEventFlag(L3_event_CALLON_REQ);
@@ -131,16 +126,19 @@ void L3_FSMrun(void)
         case L3STATE_CALL_ON: //CallOn state description
             if (L3_event_checkEventFlag(L3_event_CALLON_CNF)){
                 pc.printf("L3STATE_CALL_ON");
+
                 pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
-                //sending CALLON_REQ to L3STATE_ESTABLISHED
+
                 main_state = L3STATE_ESTABLISHED;
                 L3_event_clearEventFlag(L3_event_CALLON_CNF);
             }
             else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
             {
+                pc.printf("dddddL3STATE_CALL_ON");
                 //clear
                 L3_event_clearEventFlag(L3_event_CALLON_REQ);
+                
             }
             else if(L3_event_checkEventFlag(L3_event_CALLOFF_REQ))
             {

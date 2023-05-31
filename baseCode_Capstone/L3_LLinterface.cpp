@@ -26,7 +26,18 @@ void L3_LLI_dataInd(uint8_t* dataPtr, uint8_t srcId, uint8_t size, int8_t snr, i
     rcvdRssi = rssi;
     rcvdSrcId = srcId;
 
-    L3_event_setEventFlag(L3_event_msgRcvd);
+    if (L3_checkIfCallOnReq(rcvdMsg) == 1)
+        L3_event_setEventFlag(L3_event_CALLON_REQ);
+    else if (L3_checkIfCallOnCnf(rcvdMsg) == 1)
+        L3_event_setEventFlag(L3_event_CALLON_CNF);
+    else if (L3_checkIfCallOffReq(rcvdMsg)==1)
+        L3_event_setEventFlag(L3_event_CALLOFF_REQ);
+    else if (L3_checkIfCallOffCnf(rcvdMsg)==1)
+        L3_event_setEventFlag(L3_event_CALLOFF_CNF);
+    else if (L3_checkIfKeyboardInput(rcvdMsg)==1)
+        L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
+    else if (L3_checkIfTimeout(rcvdMsg)==1)
+        L3_event_setEventFlag(L3_event_TIMEOUT);                
 }
 
 void L3_LLI_dataCnf(uint8_t res)
