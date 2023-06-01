@@ -29,42 +29,45 @@ static uint8_t sdu[1030];
 //serial port interface
 static Serial pc(USBTX, USBRX);
 static uint8_t myDestId;
+static uint8_t call_cause = 0; //0 - origination, 1 - termination
 
 //application event handler : generating SDU from keyboard input
 static void L3service_processInputWord(void)
 {
     char c = pc.getc();
-    if (!L3_event_checkEventFlag(L3_event_CALLON_REQ))
+    if (main_state == L3STATE_IDLE || main_state == L3STATE_ESTABLISHED)
     {
         if (c == '\n' || c == '\r')
         {
             originalWord[wordLen++] = '\0';
-            L3_event_setEventFlag(L3_event_CALLON_REQ);
+            L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
             debug_if(DBGMSG_L3,"word is ready! ::: %s\n", originalWord);
         }
         else
         {
             originalWord[wordLen++] = c;
+            #if 0
             if (wordLen >= L3_MAXDATASIZE-1)
             {
                 originalWord[wordLen++] = '\0';
                 L3_event_setEventFlag(L3_event_CALLON_REQ);
                 pc.printf("\n max reached! word forced to be ready :::: %s\n", originalWord);
             }
+            #endif
         }
     }
 }
 
 
-
-void L3_initFSM(uint8_t destId)
+void L3_initFSM(void)
 {
-
+    #if 0
     myDestId = destId;
+    #endif
     //initialize service layer
     pc.attach(&L3service_processInputWord, Serial::RxIrq);
 
-    pc.printf("Let's start");
+    pc.printf("Let's start, Input a destination ID : ");
 }
 
 void L3_FSMrun(void)
@@ -80,19 +83,37 @@ void L3_FSMrun(void)
     {
         case L3STATE_IDLE: //IDLE state description
             
-            if (L3_event_checkEventFlag(L3_event_CALLON_REQ)) //if data reception event happens
+            if (L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT)) //if user requests to connect
             {
+                #if 0
                 uint8_t* dataPtr = L3_LLI_getMsgPtr();
                 uint8_t size = L3_LLI_getSize();
+                #endif
+
+                //convert input string to ID
+                myDestId = (uint8_t)atoi((char const*)originalWord); //string to integer
 
                 pduSize = L3_CONREQ_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 
+                
                 // debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
                         //    dataPtr, size);
 
-                pc.printf("L3STATE_IDLE");
-                
+                pc.printf("keyboard input in L3STATE_IDLE");
+                call_cause = 0; //this node is call origination
+                main_state = L3STATE_CALL_ON;
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
+            }
+            else if(L3_event_checkEventFlag(L3_event_CALLON_REQ)) //if the other uesr sends connect request
+            {
+                myDestId = L3_LLI_getSrcId(); //string to integer
+
+                pc.printf("rcvd callon_req from %i in L3STATE_IDLE", myDestId);
+
+                pduSize = L3_CONCNF_encodeData(sdu);
+                L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
+                call_cause = 1; //this node is call termination
                 main_state = L3STATE_CALL_ON;
                 L3_event_clearEventFlag(L3_event_CALLON_REQ);
             }
@@ -111,11 +132,13 @@ void L3_FSMrun(void)
                 //clear
                 L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
             }
+            #if 0
             else if(L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT))
             {
                 //clear
                 L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
+            #endif
             else if(L3_event_checkEventFlag(L3_event_TIMEOUT))
             {
                 //clear
@@ -124,14 +147,32 @@ void L3_FSMrun(void)
             break;
 
         case L3STATE_CALL_ON: //CallOn state description
-            if (L3_event_checkEventFlag(L3_event_CALLON_CNF)){
-                pc.printf("L3STATE_CALL_ON");
+            if (L3_event_checkEventFlag(L3_event_CALLON_CNF))
+            {
+                pc.printf("received callon cnf in L3STATE_CALL_ON");
 
+                //action for transition from CALL_ON state to ESTABLISHED state
+                //timer?
+                //user interface printing
+                #if 0
                 pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
+                #endif
 
                 main_state = L3STATE_ESTABLISHED;
                 L3_event_clearEventFlag(L3_event_CALLON_CNF);
+            }
+            else if (L3_event_checkEventFlag(L3_event_dataSendCnf))
+            {
+                if (call_cause == 1) //handle DATA_CNF only in call termination case
+                {
+                    //action for transition from CALL_ON state to ESTABLISHED state
+                    //timer?
+                    //user interface printing
+                    
+                    main_state = L3STATE_ESTABLISHED;
+                }
+                L3_event_clearEventFlag(L3_event_dataSendCnf);
             }
             else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
             {
