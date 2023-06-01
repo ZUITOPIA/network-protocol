@@ -20,8 +20,10 @@ int main(void){
         //source & destination ID setting
     pc.printf(":: ID for this node : ");
     pc.scanf("%d", &input_thisId);
+    #if 0
     pc.printf(":: ID for the destination : ");
     pc.scanf("%d", &input_destId);
+    #endif
     pc.getc();
 
     pc.printf("endnode : %i, dest : %i\n", input_thisId, input_destId);
@@ -30,7 +32,7 @@ int main(void){
 
     //initialize lower layer stacks
     L2_initFSM(input_thisId);
-    L3_initFSM(input_destId);
+    L3_initFSM();
     
     while(1)
     {
