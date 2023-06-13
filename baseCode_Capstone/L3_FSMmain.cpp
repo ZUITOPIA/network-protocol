@@ -96,11 +96,11 @@ void L3_FSMrun(void)
                 pduSize = L3_CONREQ_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 
-                
+                wordLen = 0;
                 // debug("\n -------------------------------------------------\nRCVD MSG : %s (length:%i)\n -------------------------------------------------\n", 
                         //    dataPtr, size);
 
-                pc.printf("keyboard input in L3STATE_IDLE");
+                pc.printf("keyboard input in L3STATE_IDLE\n");
                 call_cause = 0; //this node is call origination
                 main_state = L3STATE_CALL_ON;
                 L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
@@ -109,7 +109,7 @@ void L3_FSMrun(void)
             {
                 myDestId = L3_LLI_getSrcId(); //string to integer
 
-                pc.printf("rcvd callon_req from %i in L3STATE_IDLE", myDestId);
+                pc.printf("rcvd callon_req from %i in L3STATE_IDLE\n", myDestId);
 
                 pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
@@ -149,7 +149,7 @@ void L3_FSMrun(void)
         case L3STATE_CALL_ON: //CallOn state description
             if (L3_event_checkEventFlag(L3_event_CALLON_CNF))
             {
-                pc.printf("received callon cnf in L3STATE_CALL_ON");
+                pc.printf("received callon cnf in L3STATE_CALL_ON\n");
 
                 //action for transition from CALL_ON state to ESTABLISHED state
                 //timer?
@@ -158,6 +158,9 @@ void L3_FSMrun(void)
                 pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 #endif
+                
+                L3_timer_startTimer();
+                pc.printf("Give a word to send : ");
 
                 main_state = L3STATE_ESTABLISHED;
                 L3_event_clearEventFlag(L3_event_CALLON_CNF);
@@ -169,7 +172,9 @@ void L3_FSMrun(void)
                     //action for transition from CALL_ON state to ESTABLISHED state
                     //timer?
                     //user interface printing
-                    
+                    L3_timer_startTimer();
+                    pc.printf("Give a word to send : ");
+
                     main_state = L3STATE_ESTABLISHED;
                 }
                 L3_event_clearEventFlag(L3_event_dataSendCnf);
@@ -208,10 +213,11 @@ void L3_FSMrun(void)
                 L3_timer_stopTimer();
                 L3_timer_startTimer();
 
-                pc.printf("L3STATE_ESTABLISHED");
+                //pc.printf("L3STATE_ESTABLISHED");
 
                 // keyboard input 받아서 채팅
-                strcpy((char*)sdu, (char*)originalWord);
+                //strcpy((char*)sdu, (char*)originalWord);
+                wordLen = L3_CHATTXT_encodeData(sdu, originalWord);
                 debug("[L3] msg length : %i\n", wordLen);
                 L3_LLI_dataReqFunc(sdu, wordLen, myDestId);
 
@@ -231,8 +237,21 @@ void L3_FSMrun(void)
                     main_state = L3STATE_CALL_OFF;
                 }
 
-                else if (L3_event_checkEventFlag(L3_event_TIMEOUT)||
-                        L3_timer_getTimerStatus()==1){
+
+
+                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
+            }
+            else if (L3_event_checkEventFlag(L3_event_CHATTXT))
+            {
+                uint8_t* msg = L3_LLI_getMsgPtr();
+                uint8_t* txt = Msg_getWord(msg);
+
+                pc.printf("\n\n CHAT msg : %s\n\n", txt);
+
+                L3_event_clearEventFlag(L3_event_CHATTXT);
+            }
+            else if (L3_event_checkEventFlag(L3_event_TIMEOUT))
+            {
                     //timeout
                     pc.printf("Timeout: ");
                     pduSize = L3_DISREQ_encodeData(sdu);
@@ -240,9 +259,6 @@ void L3_FSMrun(void)
 
                     L3_event_clearEventFlag(L3_event_TIMEOUT);
                     main_state = L3STATE_CALL_OFF;
-                }
-
-                L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
             else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
             {

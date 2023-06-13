@@ -12,13 +12,13 @@ static uint8_t timerStatus = 0;
 void L3_timer_timeoutHandler(void) 
 {
     timerStatus = 0;
-    //L3_event_setEventFlag(L3_event_TIMEOUT);
+    L3_event_setEventFlag(L3_event_TIMEOUT);
 }
 
 //timer related functions ---------------------------
 void L3_timer_startTimer()
 {
-    uint8_t waitTime = 5; //60초로 설정
+    uint8_t waitTime = 60; //60초로 설정
     timer.attach(L3_timer_timeoutHandler, waitTime);
     timerStatus = 1;
 }

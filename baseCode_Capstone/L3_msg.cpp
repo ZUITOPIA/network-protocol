@@ -21,10 +21,19 @@ int L3_checkIfCallOffCnf(uint8_t* msg)
     return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_DISCNF);
 }
 
+int L3_checkIfChatTxt(uint8_t* msg)
+{
+    return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_CHATTXT);
+}
+
+
+
+#if 0
 int L3_checkIfKeyboardInput(uint8_t* msg)
 {
     return (msg[L3_MSG_OFFSET_TYPE]==L3_MSG_TYPE_KEYIINPUT);
 }
+#endif
 
 int L3_checkIfTimeout(uint8_t* msg)
 {
@@ -56,10 +65,20 @@ uint8_t L3_DISCNF_encodeData(uint8_t* msg)
     return 1;
 }
 
+uint8_t L3_CHATTXT_encodeData(uint8_t* msg, uint8_t* txt)
+{
+    msg[L3_MSG_OFFSET_TYPE] = L3_MSG_TYPE_CHATTXT;
+    strcpy((char*)(msg+L3_OFFSET_DATA), (const char*)txt);
+
+    return (strlen((const char*)txt) + 1);
+}
+
+#if 0
 uint8_t Msg_getSeq(uint8_t* msg)
 {
     return msg[L3_MSG_OFFSET_SYN];
 }
+#endif
 
 uint8_t* Msg_getWord(uint8_t* msg)
 {
