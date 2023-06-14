@@ -16,6 +16,7 @@
 //state variables
 static uint8_t main_state = L3STATE_IDLE; //protocol state
 static uint8_t prev_state = main_state;
+uint8_t CHATflag = 1;
 
 //L3 PDU context/size
 static uint8_t pduSize;
@@ -226,8 +227,7 @@ void L3_FSMrun(void)
                 uint8_t* msg = L3_LLI_getMsgPtr();
                 uint8_t* txt = Msg_getWord(msg);
 
-                #if 0
-                if (strcmp((const char*)txt, "exit") == 0){
+                if (strcmp((const char*)txt, "exit\n") == 0){
                     
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
@@ -236,9 +236,10 @@ void L3_FSMrun(void)
                     main_state = L3STATE_CALL_OFF;
 
                     }
-                #endif
 
-                L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
+                CHATflag = 1;
+                memset(msg, 0, sizeof(msg));
+                memset(txt, 0, sizeof(txt));
                 L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
             else if (L3_event_checkEventFlag(L3_event_CHATTXT))
@@ -254,7 +255,7 @@ void L3_FSMrun(void)
                 using namespace std;
 
                 if (strcmp((const char*)txt, "exit") == 0){
-
+                    pc.printf("ggg");
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
 
@@ -262,19 +263,27 @@ void L3_FSMrun(void)
                     main_state = L3STATE_CALL_OFF;
 
                 }
-
+                CHATflag=1;
+                memset(msg, 0, sizeof(msg));
+                memset(txt, 0, sizeof(txt));
+                wordLen = 0;
                 L3_event_clearEventFlag(L3_event_CHATTXT);
             }
-            else if (L3_event_checkEventFlag(L3_event_TIMEOUT))
-            {
-                    //timeout
-                    pc.printf("Timeout: ");
-                    pduSize = L3_DISREQ_encodeData(sdu);
-                    L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
 
-                    L3_event_clearEventFlag(L3_event_TIMEOUT);
-                    main_state = L3STATE_CALL_OFF;
+            else if (CHATflag==1){
+                pc.printf("Give a word to send : ");
+                CHATflag=0;
             }
+            // else if (L3_event_checkEventFlag(L3_event_TIMEOUT)&&CHATflag==0)
+            // {
+            //         //timeout
+            //         pc.printf("Timeout: ");
+            //         pduSize = L3_DISREQ_encodeData(sdu);
+            //         L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
+
+            //         L3_event_clearEventFlag(L3_event_TIMEOUT);
+            //         main_state = L3STATE_CALL_OFF;
+            // }
             else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
             {
                 //clear
@@ -302,21 +311,21 @@ void L3_FSMrun(void)
                 main_state = L3STATE_IDLE;
                 L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
             }
-            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
+            else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
             {
                 //clear
                 L3_event_clearEventFlag(L3_event_CALLON_REQ);
             }
-            else if(L3_event_checkEventFlag(L3_event_CALLOFF_CNF))
+            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
             {
                 //clear
                 L3_event_clearEventFlag(L3_event_CALLON_CNF);
             }   
-            else if(L3_event_checkEventFlag(L3_event_CALLOFF_REQ))
-            {
-                //clear
-                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
-            }
+            // else if(L3_event_checkEventFlag(L3_event_CALLOFF_REQ))
+            // {
+            //     //clear
+            //     L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+            // }
             else if(L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT))
             {
                 //clear
