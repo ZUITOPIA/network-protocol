@@ -152,15 +152,16 @@ void L3_FSMrun(void)
             {
                 pc.printf("received callon cnf in L3STATE_CALL_ON\n");
 
-                //action for transition from CALL_ON state to ESTABLISHED state
-                //timer?
-                //user interface printing
                 #if 0
                 pduSize = L3_CONCNF_encodeData(sdu);
                 L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                 #endif
-                
-                L3_timer_startTimer();
+
+                //******주의사항******
+                //아래 startTimer 및 ESTABLISHED state 안의 else if Timeout 주석해제 시 타이머 작동, 채팅 1개만 전송 가능
+                //주석 유지 시 exit 명령어 작동 가능, 상대방 채팅 연결 강제로 끊기
+                //Timer와 exit로 채팅끊기는 여러번 시도했으나 동시에 작동하지 않고 따로 작동시켜야 한다.
+                //L3_timer_startTimer();
                 pc.printf("Give a word to send : ");
 
                 main_state = L3STATE_ESTABLISHED;
@@ -170,10 +171,11 @@ void L3_FSMrun(void)
             {
                 if (call_cause == 1) //handle DATA_CNF only in call termination case
                 {
-                    //action for transition from CALL_ON state to ESTABLISHED state
-                    //timer?
-                    //user interface printing
-                    L3_timer_startTimer();
+
+                    //아래 startTimer 주석해제 시 타이머 작동, 채팅 1개만 전송 가능
+                    //주석 유지 시 exit 명령어 작동 가능, 상대방 채팅 연결 강제로 끊기
+                    //Timer와 exit로 채팅끊기는 여러번 시도했으나 동시에 작동하지 않고 따로 작동시켜야 한다.
+                    //L3_timer_startTimer();
                     pc.printf("Give a word to send : ");
 
                     main_state = L3STATE_ESTABLISHED;
@@ -212,6 +214,8 @@ void L3_FSMrun(void)
         case L3STATE_ESTABLISHED: //ESTABLISHED state description
             if (L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT)){
                 //pc.printf("L3STATE_ESTABLISHED");
+                // L3_timer_stopTimer();
+                // L3_timer_startTimer();
 
                 // keyboard input 받아서 채팅
                 //strcpy((char*)sdu, (char*)originalWord);
@@ -245,27 +249,26 @@ void L3_FSMrun(void)
             }
             else if (L3_event_checkEventFlag(L3_event_CHATTXT))
             {
-                L3_timer_stopTimer();
-                L3_timer_startTimer();
 
                 uint8_t* msg = L3_LLI_getMsgPtr();
                 uint8_t* txt = Msg_getWord(msg);
 
                 pc.printf("\n\n CHAT msg : %s\n\n", txt);
 
-                memset(msg, 0, sizeof(msg));
-                memset(txt, 0, sizeof(txt));
-
                 using namespace std;
 
                 if (strcmp((const char*)txt, "exit") == 0){
-                    pc.printf("ggg");
+                    pc.printf("Bye bye~~~");
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
                     L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
                     main_state = L3STATE_CALL_OFF;
 
                 }
+
+                memset(msg, 0, sizeof(msg));
+                memset(txt, 0, sizeof(txt));
+
                 CHATflag=1;
                 wordLen = 0;
                 L3_event_clearEventFlag(L3_event_CHATTXT);
@@ -275,7 +278,7 @@ void L3_FSMrun(void)
                 pc.printf("Give a word to send : ");
                 CHATflag=0;
             }
-            // else if (L3_event_checkEventFlag(L3_event_TIMEOUT)&&CHATflag==0)
+            // else if (L3_event_checkEventFlag(L3_event_TIMEOUT))
             // {
             //         //timeout
             //         pc.printf("Timeout: ");
