@@ -227,7 +227,10 @@ void L3_FSMrun(void)
                 uint8_t* msg = L3_LLI_getMsgPtr();
                 uint8_t* txt = Msg_getWord(msg);
 
-                if (strcmp((const char*)txt, "exit\n") == 0){
+                memset(msg, 0, sizeof(msg));
+                memset(txt, 0, sizeof(txt));
+
+                if (strcmp((const char*)txt, "exit") == 0){
                     
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
@@ -238,8 +241,6 @@ void L3_FSMrun(void)
                     }
 
                 CHATflag = 1;
-                memset(msg, 0, sizeof(msg));
-                memset(txt, 0, sizeof(txt));
                 L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
             else if (L3_event_checkEventFlag(L3_event_CHATTXT))
@@ -252,20 +253,20 @@ void L3_FSMrun(void)
 
                 pc.printf("\n\n CHAT msg : %s\n\n", txt);
 
+                memset(msg, 0, sizeof(msg));
+                memset(txt, 0, sizeof(txt));
+
                 using namespace std;
 
                 if (strcmp((const char*)txt, "exit") == 0){
                     pc.printf("ggg");
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
-
                     L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
                     main_state = L3STATE_CALL_OFF;
 
                 }
                 CHATflag=1;
-                memset(msg, 0, sizeof(msg));
-                memset(txt, 0, sizeof(txt));
                 wordLen = 0;
                 L3_event_clearEventFlag(L3_event_CHATTXT);
             }
