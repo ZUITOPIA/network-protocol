@@ -210,9 +210,6 @@ void L3_FSMrun(void)
 
         case L3STATE_ESTABLISHED: //ESTABLISHED state description
             if (L3_event_checkEventFlag(L3_event_KEYBOARD_INPUT)){
-                L3_timer_stopTimer();
-                L3_timer_startTimer();
-
                 //pc.printf("L3STATE_ESTABLISHED");
 
                 // keyboard input 받아서 채팅
@@ -226,27 +223,45 @@ void L3_FSMrun(void)
 
                 pc.printf("Give a word to send : ");
 
-                using namespace std;
-                std::string program_exit = "exit";
+                uint8_t* msg = L3_LLI_getMsgPtr();
+                uint8_t* txt = Msg_getWord(msg);
 
-                if (std::string(reinterpret_cast<char*>(sdu)).compare(program_exit)==0){
+                #if 0
+                if (strcmp((const char*)txt, "exit") == 0){
+                    
                     pduSize = L3_DISREQ_encodeData(sdu);
                     L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
 
                     L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
                     main_state = L3STATE_CALL_OFF;
-                }
 
+                    }
+                #endif
 
-
+                L3_event_setEventFlag(L3_event_KEYBOARD_INPUT);
                 L3_event_clearEventFlag(L3_event_KEYBOARD_INPUT);
             }
             else if (L3_event_checkEventFlag(L3_event_CHATTXT))
             {
+                L3_timer_stopTimer();
+                L3_timer_startTimer();
+
                 uint8_t* msg = L3_LLI_getMsgPtr();
                 uint8_t* txt = Msg_getWord(msg);
 
                 pc.printf("\n\n CHAT msg : %s\n\n", txt);
+
+                using namespace std;
+
+                if (strcmp((const char*)txt, "exit") == 0){
+
+                    pduSize = L3_DISREQ_encodeData(sdu);
+                    L3_LLI_dataReqFunc(sdu, pduSize, myDestId);
+
+                    L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
+                    main_state = L3STATE_CALL_OFF;
+
+                }
 
                 L3_event_clearEventFlag(L3_event_CHATTXT);
             }
@@ -279,19 +294,20 @@ void L3_FSMrun(void)
             break;
 
         case L3STATE_CALL_OFF: //CallOff state description
-            if (L3_event_checkEventFlag(L3_event_CALLOFF_CNF)){
-                pc.printf("L3STATE_CALL_OFF");
-                pduSize = L3_DISCNF_encodeData(sdu);
-                L3_LLI_dataReqFunc(sdu, pduSize, myDestId);                
+            if (L3_event_checkEventFlag(L3_event_CALLOFF_REQ)){
+                pc.printf("received calloff cnf in L3STATE_CALL_OFF\n");
+                
+                L3_timer_startTimer();
+
                 main_state = L3STATE_IDLE;
-                L3_event_clearEventFlag(L3_event_CALLOFF_CNF);
+                L3_event_clearEventFlag(L3_event_CALLOFF_REQ);
             }
-            else if(L3_event_checkEventFlag(L3_event_CALLON_REQ))
+            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
             {
                 //clear
                 L3_event_clearEventFlag(L3_event_CALLON_REQ);
             }
-            else if(L3_event_checkEventFlag(L3_event_CALLON_CNF))
+            else if(L3_event_checkEventFlag(L3_event_CALLOFF_CNF))
             {
                 //clear
                 L3_event_clearEventFlag(L3_event_CALLON_CNF);
